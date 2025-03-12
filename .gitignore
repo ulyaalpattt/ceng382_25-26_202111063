@@ -1,16 +1,30 @@
-# .env dosyasını git'e eklememek için
-.env
+# Node.js
+node_modules/
 
-# API anahtarlarını gizlemek için
-*.key
-*.pem
+# Python
+*.pyc
+*.pyo
+*.pyd
 
-# Log dosyaları
+# Log files
 *.log
 
-# Geçici dosyalar
+# Environment variable files
+.env
+config.env
+
+# macOS
 .DS_Store
 
-# Derleme dosyaları
-node_modules/
+# IDE configuration files
+.idea/
+.vscode/
+
+# Database files
+*.sqlite
+*.db
+
+# Secret files
+*.key
+*.pem
 
