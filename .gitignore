@@ -1,0 +1,30 @@
+# Node.js
+node_modules/
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+
+# Log files
+*.log
+
+# Environment variable files
+.env
+config.env
+
+# macOS
+.DS_Store
+
+# IDE configuration files
+.idea/
+.vscode/
+
+# Database files
+*.sqlite
+*.db
+
+# Secret files
+*.key
+*.pem
+
