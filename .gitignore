@@ -1,0 +1,16 @@
+# .env dosyasını git'e eklememek için
+.env
+
+# API anahtarlarını gizlemek için
+*.key
+*.pem
+
+# Log dosyaları
+*.log
+
+# Geçici dosyalar
+.DS_Store
+
+# Derleme dosyaları
+node_modules/
+
