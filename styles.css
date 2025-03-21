@@ -15,16 +15,16 @@ body {
 
 .login-container {
     position: absolute;
-    bottom: 50px;
+    bottom: 34px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.8);
     padding: 30px;
     border-radius: 10px;
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
 
+}
 
 input {
     width: 100%;
@@ -35,20 +35,36 @@ input {
 }
 
 button {
-    font-family: "Arial", sans-serif; 
+    font-family: "Audiowide", sans-serif;
     font-size: 18px; 
     font-weight: bold;
     background-color: #ff69b4; 
     color: white; 
-    padding: 12px;
+    padding: 10px;
     border: none;
-    width: 50%;
+    width: 40%;
     border-radius: 5px;
     cursor: pointer;
 }
 
 button:hover {
     background-color: #d64a92;
+}
+
+.login-links {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.login-links a {
+    color: #ff69b4; 
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
 }
 
 .cloud {
@@ -109,6 +125,5 @@ button:hover {
 .cloud:nth-child(5) { top: 3%; left: 90%; animation-duration: 25s; }
 .cloud:nth-child(6) { top: 12%; left: 20%; animation-duration: 27s; width: 110px; height: 55px; }
 .cloud:nth-child(7) { top: 8%; left: 80%; animation-duration: 19s; width: 130px; height: 65px; }
-
 
 

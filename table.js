@@ -23,3 +23,54 @@ document.getElementById('classForm').addEventListener('submit', function(event) 
 
     document.getElementById('classForm').reset();
 });
+
+
+
+
+document.getElementById("className").addEventListener("focus", function() {
+    this.style.backgroundColor = "#E6E6FA";
+});
+
+document.getElementById("className").addEventListener("blur", function() {
+    this.style.backgroundColor = "";
+});
+
+
+document.getElementById("numPeople").addEventListener("focus", function() {
+    this.style.backgroundColor = "#E6E6FA";
+});
+
+document.getElementById("numPeople").addEventListener("blur", function() {
+    this.style.backgroundColor = "";
+});
+
+
+document.getElementById("description").addEventListener("focus", function() {
+    this.style.backgroundColor = "#E6E6FA";
+});
+
+document.getElementById("description").addEventListener("blur", function() {
+    this.style.backgroundColor = "";
+});
+
+
+
+document.querySelector("table").addEventListener("mouseover", function(event) {
+    if (event.target.tagName === "TD") {
+        event.target.parentElement.style.backgroundColor = "lightgray";
+    }
+});
+document.querySelector("table").addEventListener("mouseout", function(event) {
+    if (event.target.tagName === "TD") {
+        event.target.parentElement.style.backgroundColor = "";
+    }
+});
+
+document.querySelector("table").addEventListener("click", function(event) {
+    if (event.target.tagName === "TD") {
+        console.log("Seçilen Sınıf:", event.target.parentElement.textContent);
+        event.target.parentElement.remove(); 
+    }
+});
+
+

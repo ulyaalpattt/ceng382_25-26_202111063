@@ -1,7 +1,5 @@
-// Kullanıcı giriş bilgilerini saklamak için dizi
 let loginAttempts = [];
 
-// Saat güncelleme fonksiyonu
 function updateClock() {
     const clockElement = document.getElementById('clock');
     const now = new Date();
@@ -17,30 +15,38 @@ function updateClock() {
     clockElement.textContent = timeString;
 }
 
-// Sayfa yüklendiğinde saati güncelle ve her saniyede bir tekrar et
 updateClock();
 setInterval(updateClock, 1000);
 
-// Form submit olayını dinle
 document.getElementById("loginForm").addEventListener("submit", function(event) {
-    event.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
+    event.preventDefault(); 
 
-    // Kullanıcı adı ve şifreyi al
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
-    // Kullanıcı giriş bilgilerini diziye ekle
     loginAttempts.push({ username: username, password: password });
 
-    // Konsola yazdır
     console.log("Giriş Denemeleri:");
     console.table(loginAttempts);
 
-    // Kullanıcıyı index2.html sayfasına yönlendir
-    window.location.href = "table.html";
+    if (username === "admin" && password === "admin") {
+        window.location.href = "table.html"; 
+    } else {
+        alert("Hatalı kullanıcı adı veya şifre!");
+    }
 });
 
-// Formları gizleme/gösterme özelliği
+
+
+document.getElementById("forgotPassword").addEventListener("click", function(){
+    alert("Password reset link has been sent to your email address!");
+});
+
+
+document.getElementById("signUp").addEventListener("click", function() {
+    window.location.href = "signup.html"; 
+});
+
 let formsVisible = true;
 
 document.addEventListener('keydown', function(event) {
@@ -52,3 +58,4 @@ document.addEventListener('keydown', function(event) {
         formsVisible = !formsVisible;
     }
 });
+
