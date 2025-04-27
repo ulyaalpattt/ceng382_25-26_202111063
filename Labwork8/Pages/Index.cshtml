@@ -17,6 +17,17 @@
             right: 10px;
             z-index: 999;
         }
+
+        /* Export buttons just above the table */
+        .export-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-buttons button {
+            min-width: 150px;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +109,15 @@
 
             <!-- Sağ Kısım: Tablo -->
             <div class="col-md-6">
+                <!-- Export Butonları -->
+                <div class="export-buttons">
+                    <form method="post">
+                        <input type="hidden" asp-for="SelectedColumnsJson" id="selectedColumnsInput" />
+                        <button asp-page-handler="ExportJson" name="mode" value="all" class="btn btn-secondary">Export All to JSON</button>
+                        <button asp-page-handler="ExportJson" name="mode" value="filtered" class="btn btn-secondary">Export Filtered to JSON</button>
+                    </form>
+                </div>
+
                 <table class="table table-bordered">
                     <thead class="table-light">
                         <tr>
@@ -169,23 +189,16 @@
             </div>
         </div>
 
-        <!-- Export Formu -->
-        <form method="post">
-            <input type="hidden" asp-for="SelectedColumnsJson" id="selectedColumnsInput" /> <!-- 🔧 ASP ile uyumlu hale getirildi -->
-            <button asp-page-handler="ExportJson" name="mode" value="all" class="btn btn-secondary">Export All to JSON</button>
-            <button asp-page-handler="ExportJson" name="mode" value="filtered" class="btn btn-secondary">Export Filtered to JSON</button>
-        </form>
-        <!-- 🔧 JSON çıktısını göstermek için alan -->
+        <!-- JSON çıktısını göstermek için alan -->
         @if (TempData["JsonPreview"] != null)
         {
             <div class="mt-4">
                 <h5>Exported JSON Preview:</h5>
                 <pre style="max-height: 300px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd;">
-        @ViewData["JsonPreview"]
+                    @ViewData["JsonPreview"]
                 </pre>
             </div>
         }
-
     </div>
 
     <script>

@@ -7656,11 +7656,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/ulya/Desktop/Labwork7/Labwork5.csproj",
+      "projectUniqueName": "/Users/ulya/Desktop/lab 382/ceng382_25-26_202111063/Labwork8/Labwork5.csproj",
       "projectName": "Labwork5",
-      "projectPath": "/Users/ulya/Desktop/Labwork7/Labwork5.csproj",
+      "projectPath": "/Users/ulya/Desktop/lab 382/ceng382_25-26_202111063/Labwork8/Labwork5.csproj",
       "packagesPath": "/Users/ulya/.nuget/packages/",
-      "outputPath": "/Users/ulya/Desktop/Labwork7/obj/",
+      "outputPath": "/Users/ulya/Desktop/lab 382/ceng382_25-26_202111063/Labwork8/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/ulya/.nuget/NuGet/NuGet.Config"
