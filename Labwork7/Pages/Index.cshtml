@@ -9,10 +9,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Information</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        /* Custom CSS to position the logout button in the top-right corner */
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 999;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
+        @if (HttpContext.Session.GetString("username") != null)
+        {
+            <!-- Logout Button in the top-right corner -->
+            <form method="post" asp-page-handler="Logout" class="logout-button">
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        }
+
         <h1 class="mt-4 mb-4">Class Information</h1>
+
+        <!-- Çerez Bilgileri -->
+        <div class="mt-4">
+            <h5>Cookie Information</h5>
+            <p><strong>Username:</strong> @Model.cookieUsername</p>
+            <p><strong>Token:</strong> @Model.cookieToken</p>
+            <p><strong>Session ID:</strong> @Model.cookieSessionId</p>
+        </div>
 
         <div class="row">
             <!-- Sol Kısım: Filtreleme ve Form -->
@@ -185,6 +210,5 @@
             });
         });
     </script>
-
 </body>
 </html>

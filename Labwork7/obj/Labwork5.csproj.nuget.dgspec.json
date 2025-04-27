@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/ulya/Desktop/ceng382/Labwork7/Labwork5.csproj": {}
+    "/Users/ulya/Desktop/Labwork7/Labwork5.csproj": {}
   },
   "projects": {
-    "/Users/ulya/Desktop/ceng382/Labwork7/Labwork5.csproj": {
+    "/Users/ulya/Desktop/Labwork7/Labwork5.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/ulya/Desktop/ceng382/Labwork7/Labwork5.csproj",
+        "projectUniqueName": "/Users/ulya/Desktop/Labwork7/Labwork5.csproj",
         "projectName": "Labwork5",
-        "projectPath": "/Users/ulya/Desktop/ceng382/Labwork7/Labwork5.csproj",
+        "projectPath": "/Users/ulya/Desktop/Labwork7/Labwork5.csproj",
         "packagesPath": "/Users/ulya/.nuget/packages/",
-        "outputPath": "/Users/ulya/Desktop/ceng382/Labwork7/obj/",
+        "outputPath": "/Users/ulya/Desktop/Labwork7/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/ulya/.nuget/NuGet/NuGet.Config"

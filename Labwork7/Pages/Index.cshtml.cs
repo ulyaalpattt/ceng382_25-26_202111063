@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 
-
 namespace Labwork5.Pages
 {
     public class IndexModel : PageModel
@@ -26,14 +25,34 @@ namespace Labwork5.Pages
         [BindProperty] public string SelectedColumnsJson { get; set; } = string.Empty;
 
         public List<ClassInformationTable> AllClasses { get; set; } = new(); // tüm sınıflar
-
         public List<ClassInformationTable> FilteredClasses { get; set; } = new();
         public int TotalPages { get; set; }
         private const int PageSize = 10;
         public string? JsonPreviewContent { get; set; }
+        public string cookieUsername { get; set; }
+        public string cookieToken { get; set; }
+        public string cookieSessionId { get; set; }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            // ✅ Giriş kontrolü (Session & Cookie doğrulama)
+            var sessionUsername = HttpContext.Session.GetString("username");
+            var sessionToken = HttpContext.Session.GetString("token");
+            var sessionId = HttpContext.Session.GetString("session_id");
+
+            cookieUsername = Request.Cookies["username"];
+            cookieToken = Request.Cookies["token"];
+            cookieSessionId = Request.Cookies["session_id"];
+
+            if (sessionUsername == null || cookieUsername != sessionUsername ||
+                sessionToken == null || cookieToken != sessionToken ||
+                sessionId == null || cookieSessionId != sessionId)
+            {
+                TempData["Error"] = "Please login to access the page.";
+                return RedirectToPage("/Login");
+            }
+
+            // ✅ Sınıf verilerini başlat
             if (Classes.Count == 0)
             {
                 for (int i = 1; i <= 100; i++)
@@ -68,15 +87,14 @@ namespace Labwork5.Pages
             var totalClasses = filteredClasses.Count();
             TotalPages = (int)System.Math.Ceiling(totalClasses / (double)PageSize);
 
-
-
-// JSON'a dönüştürme
             HttpContext.Session.SetString("FilteredClasses", JsonSerializer.Serialize(filteredClasses.ToList()));
-            
+
             FilteredClasses = filteredClasses
                 .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
+
+            return Page();
         }
 
         public IActionResult OnPostAdd()
@@ -134,48 +152,47 @@ namespace Labwork5.Pages
 
             return RedirectToPage();
         }
-        
+
+        public IActionResult OnPostLogout()
+        {
+            // Clear session data
+            HttpContext.Session.Clear();
+
+            // Remove cookies related to login
+            Response.Cookies.Delete("username");
+            Response.Cookies.Delete("token");
+            Response.Cookies.Delete("session_id");
+
+            // Redirect to the login page
+            return RedirectToPage("/Login");
+        }
 
         public IActionResult OnPostExportJson(string mode)
         {
-            // Filtreleme işlemi için seçilen sütunlar
             var selectedColumns = string.IsNullOrWhiteSpace(SelectedColumnsJson)
                 ? null
-                : System.Text.Json.JsonSerializer.Deserialize<List<string>>(SelectedColumnsJson);
+                : JsonSerializer.Deserialize<List<string>>(SelectedColumnsJson);
 
             List<ClassInformationTable> dataToExport;
 
             if (mode == "filtered")
             {
                 var jsonData = HttpContext.Session.GetString("FilteredClasses");
-                if (!string.IsNullOrEmpty(jsonData))
-                {
-                    dataToExport = JsonSerializer.Deserialize<List<ClassInformationTable>>(jsonData);
-                }
-                else
-                {
-                    dataToExport = new List<ClassInformationTable>(); // fallback
-                }
+                dataToExport = string.IsNullOrEmpty(jsonData)
+                    ? new List<ClassInformationTable>()
+                    : JsonSerializer.Deserialize<List<ClassInformationTable>>(jsonData);
             }
-
             else
             {
-                // Tüm veriyi al
                 dataToExport = Classes;
             }
 
-            // JSON verisini üretme
             var json = Utils.Instance.ExportToJson(dataToExport, selectedColumns);
             var bytes = Encoding.UTF8.GetBytes(json);
 
-            // JSON önizleme içeriği (kısa bir kısmı gösterilecek)
             TempData["JsonPreview"] = json.Length > 1000 ? json.Substring(0, 1000) + "..." : json;
 
-            // JSON dosyasını export et
             return File(bytes, "application/json", $"{mode}_data.json");
         }
-
-
-
     }
 }
