@@ -1,6 +1,6 @@
 using System;
 
-namespace YourNamespace.Models
+namespace Labwork5.Models
 {
     public class User
     {

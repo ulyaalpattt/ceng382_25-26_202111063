@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Labwork5.Models;
 using Labwork5.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using Labwork5.Data;
 
 namespace Labwork5.Pages
 {
     public class IndexModel : PageModel
     {
-        public static List<ClassInformationTable> Classes = new List<ClassInformationTable>();
-
         [BindProperty] public string ClassName { get; set; } = string.Empty;
         [BindProperty] public int StudentCount { get; set; }
         [BindProperty] public string Description { get; set; } = string.Empty;
@@ -24,7 +24,6 @@ namespace Labwork5.Pages
         [BindProperty(SupportsGet = true)] public string? DescriptionFilter { get; set; }
         [BindProperty] public string SelectedColumnsJson { get; set; } = string.Empty;
 
-        public List<ClassInformationTable> AllClasses { get; set; } = new(); // tüm sınıflar
         public List<ClassInformationTable> FilteredClasses { get; set; } = new();
         public int TotalPages { get; set; }
         private const int PageSize = 10;
@@ -33,9 +32,17 @@ namespace Labwork5.Pages
         public string cookieToken { get; set; }
         public string cookieSessionId { get; set; }
 
-        public IActionResult OnGet()
+        private readonly SchoolDbContext _context;
+        public IndexModel(SchoolDbContext context)
         {
-            // ✅ Giriş kontrolü (Session & Cookie doğrulama)
+            _context = context;
+        }
+
+        public IList<Class> ClassList { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            // Giriş kontrolü (Session & Cookie doğrulama)
             var sessionUsername = HttpContext.Session.GetString("username");
             var sessionToken = HttpContext.Session.GetString("token");
             var sessionId = HttpContext.Session.GetString("session_id");
@@ -52,46 +59,44 @@ namespace Labwork5.Pages
                 return RedirectToPage("/Login");
             }
 
-            // ✅ Sınıf verilerini başlat
-            if (Classes.Count == 0)
+            // Veritabanından sınıfları al
+            ClassList = await _context.Classes.Where(c => c.IsActive).ToListAsync(); // Sadece aktif sınıfları al
+
+            // Null kontrolü ekleyin
+            if (ClassList == null || !ClassList.Any())
             {
-                for (int i = 1; i <= 100; i++)
-                {
-                    Classes.Add(new ClassInformationTable
-                    {
-                        Id = i,
-                        ClassName = $"Class {i}",
-                        StudentCount = i % 50,
-                        Description = $"Description {i}"
-                    });
-                }
+                TempData["Error"] = "No classes found in the database.";
+                return RedirectToPage();
             }
 
-            if (CurrentPage < 1)
-                CurrentPage = 1;
-
-            var filteredClasses = Classes.AsQueryable();
+            // Filtreleme işlemleri
+            var filteredClasses = ClassList.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(SearchTerm))
-                filteredClasses = filteredClasses.Where(c => c.ClassName != null && c.ClassName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase));
+                filteredClasses = filteredClasses.Where(c => c.Name.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase));
 
             if (MinStudentCount.HasValue)
-                filteredClasses = filteredClasses.Where(c => c.StudentCount >= MinStudentCount.Value);
+                filteredClasses = filteredClasses.Where(c => c.PersonCount >= MinStudentCount.Value);
 
             if (MaxStudentCount.HasValue)
-                filteredClasses = filteredClasses.Where(c => c.StudentCount <= MaxStudentCount.Value);
+                filteredClasses = filteredClasses.Where(c => c.PersonCount <= MaxStudentCount.Value);
 
             if (!string.IsNullOrEmpty(DescriptionFilter))
-                filteredClasses = filteredClasses.Where(c => c.Description != null && c.Description.Contains(DescriptionFilter, System.StringComparison.OrdinalIgnoreCase));
+                filteredClasses = filteredClasses.Where(c => c.Description.Contains(DescriptionFilter, System.StringComparison.OrdinalIgnoreCase));
 
             var totalClasses = filteredClasses.Count();
             TotalPages = (int)System.Math.Ceiling(totalClasses / (double)PageSize);
 
-            HttpContext.Session.SetString("FilteredClasses", JsonSerializer.Serialize(filteredClasses.ToList()));
-
             FilteredClasses = filteredClasses
                 .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
+                .Select(c => new ClassInformationTable
+                {
+                    Id = c.Id,
+                    ClassName = c.Name,
+                    StudentCount = c.PersonCount,
+                    Description = c.Description
+                })
                 .ToList();
 
             return Page();
@@ -99,14 +104,16 @@ namespace Labwork5.Pages
 
         public IActionResult OnPostAdd()
         {
-            var newClass = new ClassInformationTable
+            var newClass = new Class
             {
-                Id = Classes.Any() ? Classes.Max(c => c.Id) + 1 : 1,
-                ClassName = ClassName,
-                StudentCount = StudentCount,
-                Description = Description
+                Name = ClassName,
+                PersonCount = StudentCount,
+                Description = Description,
+                IsActive = true // Yeni sınıf aktif olarak eklenecek
             };
-            Classes.Add(newClass);
+
+            _context.Classes.Add(newClass);
+            _context.SaveChanges();
 
             ClassName = string.Empty;
             StudentCount = 0;
@@ -115,55 +122,83 @@ namespace Labwork5.Pages
             return RedirectToPage();
         }
 
-        public IActionResult OnPostDelete(int id)
+        public async Task<IActionResult> OnPostDelete(int id)
         {
-            var classToRemove = Classes.Find(c => c.Id == id);
+            // Veritabanından sınıfı bul
+            var classToRemove = await _context.Classes.FindAsync(id);
+
             if (classToRemove != null)
-                Classes.Remove(classToRemove);
+            {
+                // Silmek yerine sadece IsActive'yi false yap
+                classToRemove.IsActive = false;
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToPage();
         }
 
-        public IActionResult OnPostEdit(int id)
+        public async Task<IActionResult> OnPostEdit(int id)
         {
-            var classToEdit = Classes.FirstOrDefault(c => c.Id == id);
+            // Sınıfı veritabanından bul
+            var classToEdit = await _context.Classes.FindAsync(id);
             if (classToEdit != null)
             {
-                ClassName = classToEdit.ClassName;
-                StudentCount = classToEdit.StudentCount;
+                ClassName = classToEdit.Name;
+                StudentCount = classToEdit.PersonCount;
                 Description = classToEdit.Description;
                 ClassIdToEdit = classToEdit.Id;
             }
+            else
+            {
+                TempData["Error"] = "Class not found.";
+            }
+
             return Page();
         }
 
-        public IActionResult OnPostUpdate()
+        public async Task<IActionResult> OnPostUpdate()
         {
+            // Eğer ClassIdToEdit null ise, hata ver
             if (ClassIdToEdit == null)
-                return Page();
-
-            var classToUpdate = Classes.FirstOrDefault(c => c.Id == ClassIdToEdit);
-            if (classToUpdate != null)
             {
-                classToUpdate.ClassName = ClassName;
-                classToUpdate.StudentCount = StudentCount;
-                classToUpdate.Description = Description;
+                TempData["Error"] = "Class ID is missing.";
+                return Page();
             }
 
+            // Sınıfı veritabanından bul
+            var classToUpdate = await _context.Classes.FirstOrDefaultAsync(c => c.Id == ClassIdToEdit);
+
+            // Eğer sınıf bulunduysa, bilgileri güncelle
+            if (classToUpdate != null)
+            {
+                classToUpdate.Name = ClassName;
+                classToUpdate.PersonCount = StudentCount;
+                classToUpdate.Description = Description;
+
+                // Değişiklikleri veritabanına kaydet
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Class updated successfully!";
+            }
+            else
+            {
+                TempData["Error"] = "Class not found.";
+            }
+
+            // Ana sayfaya dön
             return RedirectToPage();
         }
 
         public IActionResult OnPostLogout()
         {
-            // Clear session data
+            // Oturum verilerini temizle
             HttpContext.Session.Clear();
 
-            // Remove cookies related to login
+            // Girişle ilgili çerezleri sil
             Response.Cookies.Delete("username");
             Response.Cookies.Delete("token");
             Response.Cookies.Delete("session_id");
 
-            // Redirect to the login page
+            // Giriş sayfasına yönlendir
             return RedirectToPage("/Login");
         }
 
@@ -184,7 +219,7 @@ namespace Labwork5.Pages
             }
             else
             {
-                dataToExport = Classes;
+                dataToExport = FilteredClasses;
             }
 
             var json = Utils.Instance.ExportToJson(dataToExport, selectedColumns);

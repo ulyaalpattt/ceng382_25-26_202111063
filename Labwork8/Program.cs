@@ -1,3 +1,7 @@
+using Labwork5.Data;
+using Microsoft.EntityFrameworkCore;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,7 +13,14 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 
 });
+// Add and configure the database context
+builder.Services.AddDbContext<SchoolDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
+
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
